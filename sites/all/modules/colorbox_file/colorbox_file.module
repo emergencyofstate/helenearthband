@@ -1,0 +1,176 @@
+<?php
+// $Id:
+
+/**
+ * @file
+ * A light-weight integration between Colorbox and a Media image
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function colorbox_file_theme() {
+  return array(
+    // file.module.
+    'file_colorbox' => array(
+      'variables' => array(
+        'file' => NULL, 
+        'icon_directory' => NULL, 
+        'styles_overrides' => NULL, 
+        'colorbox_node_style' => NULL,
+        'colorbox_image_style' => NULL,
+       ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function colorbox_file_field_formatter_info() {
+  //the same approach used by the colorbox module for image fields
+  return array(
+    'file_colorbox' => array(
+      'label' => t('Colorbox file'),
+      'field types' => array('file'),
+      'settings' => array('colorbox_node_style' => '', 'colorbox_image_style' => ''),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_field_formatter_settings_form().
+ */
+function colorbox_file_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $image_styles = image_style_options(FALSE);
+  $element['colorbox_node_style'] = array(
+    '#title' => t('Node image style'),
+    '#type' => 'select',
+    '#default_value' => $settings['colorbox_node_style'],
+    '#empty_option' => t('None (original image)'),
+    '#options' => $image_styles,
+  );
+  $element['colorbox_image_style'] = array(
+    '#title' => t('Colorbox image style'),
+    '#type' => 'select',
+    '#default_value' => $settings['colorbox_image_style'],
+    '#empty_option' => t('None (original image)'),
+    '#options' => $image_styles,
+  );
+
+  return $element;
+}
+
+/**
+ * Implementation of hook_field_formatter_settings_summary().
+ */
+function colorbox_file_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $summary = array();
+
+  $image_styles = image_style_options(FALSE);
+  // Unset possible 'No defined styles' option.
+  unset($image_styles['']);
+  // Styles could be lost because of enabled/disabled modules that defines
+  // their styles in code.
+  if (isset($image_styles[$settings['colorbox_node_style']])) {
+    $summary[] = t('Node image style: @style', array('@style' => $image_styles[$settings['colorbox_node_style']]));
+  }
+  else {
+    $summary[] = t('Node image style: Original image');
+  }
+
+  if (isset($image_styles[$settings['colorbox_image_style']])) {
+    $summary[] = t('Colorbox image style: @style', array('@style' => $image_styles[$settings['colorbox_image_style']]));
+  }
+  else {
+    $summary[] = t('Colorbox image style: Original image');
+  }
+
+  return implode('<br />', $summary);
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function colorbox_file_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  switch ($display['type']) {
+    case 'file_colorbox':
+      $styles_overrides = array();
+      if (isset($entity->override)) {
+        $styles_overrides = $entity->override;
+      }
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+          '#theme' => 'file_colorbox',
+          '#file' => (object) $item,
+          '#styles_overrides' => $styles_overrides,
+          '#colorbox_node_style' => $display['settings']['colorbox_node_style'],
+          '#colorbox_image_style' => $display['settings']['colorbox_image_style'],
+        );
+      }
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Returns HTML for a link to a file.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - file: A file object to which the link will be created.
+ *   - icon_directory: (optional) A path to a directory of icons to be used for
+ *     files. Defaults to the value of the "file_icon_directory" variable.
+ *
+ * @ingroup themeable
+ */
+function theme_file_colorbox($variables) {
+  $output = '';
+  
+  $file = $variables['file'];
+  $icon_directory = $variables['icon_directory'];
+  
+  $attributes = array();
+  if (isset($variables['styles_overrides']['style'])) {
+    $attributes['style'] = $variables['styles_overrides']['style'];
+  }
+  $title = '';
+  if (isset($variables['styles_overrides']['title'])) {
+    $title = $variables['styles_overrides']['title'];
+  }
+  $alt = '';
+  if (isset($variables['styles_overrides']['alt'])) {
+    $alt = $variables['styles_overrides']['alt'];
+  }
+  if($file->type == 'image') {
+    $image = array(
+      'path' => $file->uri,
+      'alt' => $alt,
+      'title' => $title,
+      'style_name' => $variables['colorbox_node_style'],
+      'attributes' => $attributes,
+    );
+    
+    $path = '';
+    if ($style_name = $variables['colorbox_image_style']) {
+      $path = image_style_url($style_name, $image['path']);
+    }
+    else {
+      $path = file_create_url($image['path']);
+    }
+    $output = theme('colorbox_imagefield', array('image' => $image, 'path' => $path, 'title' => $image['title']));
+  }
+  else {
+    $output = theme('file_link', array('file' => $file, 'icon_directory' => $icon_directory));
+  }
+
+  return $output;
+}

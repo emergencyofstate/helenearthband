@@ -1,0 +1,11 @@
+; $Id
+name = Colorbox File
+description = Integrates Colorbox with the Media module via a colorbox file formatter.
+package = Styles
+core = 7.x
+php = 5.2
+
+files[] = colorbox_file.module
+
+dependencies[] = image
+dependencies[] = colorbox

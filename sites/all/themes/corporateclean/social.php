@@ -1,0 +1,5 @@
+<?php $GLOBALS['user']->roles; ?>
+
+
+
+<ul><li><a href="http://facebook.com/helenearthband"><img src="/sites/all/themes/corporateclean/images/social-coffee/facebook-logo.png" width="34px" height="34px"></a></li><li><a href="http://twitter.com/helenearthband"><img src="/sites/all/themes/corporateclean/images/social-coffee/twitter.png" width="34px" height="34px"></a></li><li><a href="http://last.fm/music/Helen+Earth+Band"><img src="/sites/all/themes/corporateclean/images/social-coffee/lastfm.png" width="34px" height="34px"></a></li><li><a href="http://www.youtube.com/user/helenearthband"><img src="/sites/all/themes/corporateclean/images/social-coffee/youtube.png" width="34px" height="34px"></a></li><li><a href="http://www.myspace.com/helenearthband"><img style="display: none;" src="/sites/all/themes/corporateclean/images/heb_logo.jpg"><img src="/sites/all/themes/corporateclean/images/social-coffee/myspace-logo.png" width="34px" height="34px"></a></li></ul>

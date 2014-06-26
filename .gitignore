@@ -10,3 +10,4 @@ sites/*/private
 emergencyofstate
 error_log
 old-site
+.idea/
